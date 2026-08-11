@@ -1,9 +1,9 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,DeclarativeBase
-from config import setting # setting is sql_address
+from app.config import setting_obj # setting is sql_address
 
-engine = create_engine(setting)
+engine = create_engine(setting_obj.sql_address)
 local_session = sessionmaker(autoflush=False,autocommit=False,bind=engine)
 
 class Base(DeclarativeBase):

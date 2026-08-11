@@ -2,8 +2,13 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from app.app.database import Base
+from app.database import Base
 from alembic import context
+
+# this line is new
+# when the tables are in different file from database we should import them
+from tasks.models import *
+# now the tables can create by alembic
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
