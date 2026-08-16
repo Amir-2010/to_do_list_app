@@ -2,7 +2,7 @@
 from fastapi import APIRouter,Depends,status,HTTPException,Query
 from sqlalchemy.orm import Session
 from app.database import get_db
-from tasks.models import task_models
+from tasks.models import task_models,users_models
 
 router = APIRouter()
 
@@ -37,18 +37,25 @@ def get_complete_or_incomplete_works(
         return query.limit(limited).offset(offset_var).all()
 
 @router.post("/add_work",tags=["add work"])
-async def add_work(work_title:str,description:str|None=None,db:Session=Depends(get_db)):
-    query = db.query(task_models)
-    check_duplicate = query.where(task_models.title == work_title).one_or_none()
-    if check_duplicate == None:
-        get_id = query.where(task_models.title==work_title).one_or_none()
-        work_obj = task_models(title=work_title,description=description,user_id=get_id)
-        db.add(work_obj)
-        db.commit()
-        result = query.where(task_models.title == work_title).one_or_none()
-        return result
+async def add_work(user_name:str,
+                   work_title:str,
+                   description:str|None=None,
+                   db:Session=Depends(get_db)):
+    users_query = db.query(users_models)
+    check_database = users_query.where(users_models.name==user_name).first()
+    if check_database:
+        query = db.query(task_models)
+        check_duplicate = query.where(task_models.title==work_title).one_or_none()
+        if check_duplicate == None:
+                work_obj = task_models(title=work_title,description=description,user_id=check_database.id)
+                db.add(work_obj)
+                db.commit()
+                result = query.where(task_models.title == work_title).one_or_none()
+                return result
+        else:
+            raise HTTPException(status_code=status.HTTP_204_NO_CONTENT,detail="duplicate work")
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="duplicate work")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user_name not found")
 
 @router.put("/new_title",tags=["update title"])
 async def update_work(work_title:str,new_title:str,db:Session=Depends(get_db)):

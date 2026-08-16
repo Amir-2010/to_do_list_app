@@ -24,3 +24,9 @@ class users_models(Base):
 
     def __repr__(self):
         return f"users(id={self.id},name={self.name},password={self.password},user status={self.user_status})"
+
+class token_models(Base):
+    __tablename__ = "token"
+    id = Column(Integer,primary_key=True,autoincrement=True)
+    user_id = Column(Integer,ForeignKey("users.id"))
+    token = Column(Integer,ForeignKey("users.id"))
